@@ -21,3 +21,4 @@ funasr
 python-dotenv
 onnx
 onnxruntime
+onnxconverter-common
