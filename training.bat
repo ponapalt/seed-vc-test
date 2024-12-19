@@ -16,8 +16,8 @@ echo ========================
 if not exist "venv\Scripts\python.exe" (
     echo Creating virtual environment...
     python -m venv venv
-    if %ERRORLEVEL% neq 0 (
-        call :error_handler "Failed to create a virtual environment. Error code: %ERRORLEVEL%"
+    if !ERRORLEVEL! neq 0 (
+        call :error_handler "Failed to create a virtual environment. Error code: !ERRORLEVEL!"
     )
 )
 
@@ -30,8 +30,8 @@ endlocal
 call venv\Scripts\activate
 setlocal enabledelayedexpansion
 
-if %ERRORLEVEL% neq 0 (
-    call :error_handler "Failed to activate the virtual environment. Error code: %ERRORLEVEL%"
+if !ERRORLEVEL! neq 0 (
+    call :error_handler "Failed to activate the virtual environment. Error code: !ERRORLEVEL!"
 )
 
 echo ========================
@@ -40,7 +40,7 @@ echo ========================
 
 :: Check if Visual C++ Build Tools are installed
 reg query "HKLM\SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" >nul 2>&1
-if %ERRORLEVEL% neq 0 (
+if !ERRORLEVEL! neq 0 (
     echo Visual C++ Build Tools are not installed.
     echo Please install from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
     goto end
@@ -51,8 +51,8 @@ echo Upgrading pip...
 echo ========================
 
 python -m pip install --upgrade pip
-if %ERRORLEVEL% neq 0 (
-    call :error_handler "Failed to upgrade pip. Error code: %ERRORLEVEL%"
+if !ERRORLEVEL! neq 0 (
+    call :error_handler "Failed to upgrade pip. Error code: !ERRORLEVEL!"
     goto end
 )
 
@@ -61,22 +61,48 @@ echo ========================
 echo Installing dependencies...
 echo ========================
 pip install -U -r requirements.txt
-if %ERRORLEVEL% neq 0 (
-    call :error_handler "Failed to install dependencies. Error code: %ERRORLEVEL%"
+if !ERRORLEVEL! neq 0 (
+    call :error_handler "Failed to install dependencies. Error code: !ERRORLEVEL!"
 )
 
 echo.
 echo ========================
-echo Starting app...
+echo Training Configuration
 echo ========================
 
-endlocal
+:: Set default values
+set "max_epochs=100"
+set "run_name=model"
 
-python train.py --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --dataset-dir ./training_data --run-name model --batch-size 2 --max-steps 1000 --max-epochs 100 --save-every 500 --num-workers 0
+:: Ask for max epochs
+set /p "epochs_input=Enter maximum epochs (default: 100, press Enter to use default): "
+if not "!epochs_input!"=="" set "max_epochs=!epochs_input!"
+
+:: Ask for run name
+set /p "name_input=Enter run name (default: model, press Enter to use default): "
+if not "!name_input!"=="" set "run_name=!name_input!"
+
+echo.
+echo Configuration Summary:
+echo - Maximum Epochs: !max_epochs!
+echo - Run Name: !run_name!
+echo.
+set /p "confirm=Is this correct? (Y/N): "
+if /i not "!confirm!"=="Y" goto end
+
+echo.
+echo ========================
+echo Starting training...
+echo ========================
+
+:: Store the variables in global environment variables before endlocal
+endlocal & set "TRAIN_MAX_EPOCHS=%max_epochs%" & set "TRAIN_RUN_NAME=%run_name%"
+
+python train.py --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --dataset-dir ./training_data --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
 
 setlocal enabledelayedexpansion
 
-if %ERRORLEVEL% neq 0 (
+if !ERRORLEVEL! neq 0 (
     echo Failed to start the application.
     exit /b 1
 )
