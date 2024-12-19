@@ -72,7 +72,7 @@ echo ========================
 
 endlocal
 
-python real-time-gui.py --checkpoint ./runs/model/ft_model.pth --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml
+python app_svc.py --checkpoint ./runs/model/ft_model.pth --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --fp16 True
 
 setlocal enabledelayedexpansion
 
@@ -85,3 +85,7 @@ if %ERRORLEVEL% neq 0 (
 echo Script finished. Press any key to exit...
 pause
 exit
+
+
+
+
