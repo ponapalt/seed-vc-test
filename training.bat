@@ -73,6 +73,21 @@ echo ========================
 :: Set default values
 set "max_epochs=100"
 set "run_name=model"
+set "config_path=./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"
+
+:: Select model type
+echo Select model type:
+echo 1) Realtime
+echo 2) Singing
+set /p "model_type=Enter your choice (1-2): "
+
+if "!model_type!"=="1" (
+    set "config_path=./configs/presets/config_dit_mel_seed_uvit_xlsr_tiny.yml"
+) else if "!model_type!"=="2" (
+    set "config_path=./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"
+) else (
+    echo Invalid selection. Using default Singing config.
+)
 
 :: Ask for max epochs
 set /p "epochs_input=Enter maximum epochs (default: 100, press Enter to use default): "
@@ -84,6 +99,8 @@ if not "!name_input!"=="" set "run_name=!name_input!"
 
 echo.
 echo Configuration Summary:
+echo - Model Type: !model_type! (1=Realtime, 2=Singing)
+echo - Config File: !config_path!
 echo - Maximum Epochs: !max_epochs!
 echo - Run Name: !run_name!
 echo.
@@ -96,9 +113,9 @@ echo Starting training...
 echo ========================
 
 :: Store the variables in global environment variables before endlocal
-endlocal & set "TRAIN_MAX_EPOCHS=%max_epochs%" & set "TRAIN_RUN_NAME=%run_name%"
+endlocal & set "TRAIN_MAX_EPOCHS=%max_epochs%" & set "TRAIN_RUN_NAME=%run_name%" & set "TRAIN_CONFIG_PATH=%config_path%"
 
-python train.py --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --dataset-dir ./training_data --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
+python train.py --config %TRAIN_CONFIG_PATH% --dataset-dir ./training_data --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
 
 setlocal enabledelayedexpansion
 
