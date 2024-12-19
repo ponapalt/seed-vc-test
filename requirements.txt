@@ -19,3 +19,5 @@ sounddevice
 modelscope
 funasr
 python-dotenv
+onnx
+onnxruntime
