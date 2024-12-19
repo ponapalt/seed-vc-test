@@ -84,7 +84,7 @@ set /p choice="Enter the number of the folder you want to use: "
 if !choice! leq 0 goto invalid_choice
 if !choice! gtr !index! goto invalid_choice
 
-:: Get selected folder name
+:: Get selected folder name and store it in a temporary environment variable
 set "selected_folder=!folder[%choice%]!"
 
 echo.
@@ -92,9 +92,10 @@ echo ========================
 echo Starting app with !selected_folder!...
 echo ========================
 
-endlocal
+:: Store the selected folder in a global environment variable before endlocal
+endlocal & set "SELECTED_MODEL_FOLDER=%selected_folder%"
 
-python app_svc.py --checkpoint ./runs/!selected_folder!/ft_model.pth --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --fp16 True
+python app_svc.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --fp16 True
 
 setlocal enabledelayedexpansion
 
