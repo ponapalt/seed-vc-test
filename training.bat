@@ -102,7 +102,7 @@ if not "!name_input!"=="" set "run_name=!name_input!"
 
 echo.
 echo Configuration Summary:
-echo - Model Type: !model_type! (1=Realtime, 2=Singing)
+echo - Model Type: !model_type! (1=Realtime, 2=Singing, 3=Test)
 echo - Config File: !config_path!
 echo - Maximum Epochs: !max_epochs!
 echo - Run Name: !run_name!
