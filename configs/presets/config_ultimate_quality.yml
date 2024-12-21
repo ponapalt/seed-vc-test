@@ -10,11 +10,11 @@ max_len: 80 # maximum number of frames
 load_only_params: False # set to true if do not want to load epoch numbers and optimizer parameters
 
 preprocess_params:
-  sr: 96000
+  sr: 44100
   spect_params:
     n_fft: 2048
     win_length: 2048
-    hop_length: 128
+    hop_length: 512
     n_mels: 128
     fmin: 0
     fmax: "None"
@@ -60,7 +60,7 @@ model_params:
 
   DiT:
     hidden_dim: 768
-    num_heads: 24
+    num_heads: 12
     depth: 17
     class_dropout_prob: 0.1
     block_size: 8192
@@ -84,10 +84,10 @@ model_params:
 
   wavenet:
     hidden_dim: 768
-    num_layers: 16
+    num_layers: 8
     kernel_size: 5
     dilation_rate: 1
-    p_dropout: 0.05
+    p_dropout: 0.2
     style_condition: true
 
 loss_params:

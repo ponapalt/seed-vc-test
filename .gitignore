@@ -23,4 +23,5 @@ ruff.log
 /configs/inuse/
 /venv
 *.wav
+*.bak
 /runs
