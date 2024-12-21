@@ -79,12 +79,15 @@ set "config_path=./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.
 echo Select model type:
 echo 1) Realtime
 echo 2) Singing
-set /p "model_type=Enter your choice (1-2): "
+echo 3) Test Config
+set /p "model_type=Enter your choice (1-3): "
 
 if "!model_type!"=="1" (
     set "config_path=./configs/presets/config_dit_mel_seed_uvit_xlsr_tiny.yml"
 ) else if "!model_type!"=="2" (
     set "config_path=./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"
+) else if "!model_type!"=="3" (
+    set "config_path=./configs/presets/config_ultimate_quality.yml"
 ) else (
     echo Invalid selection. Using default Singing config.
 )

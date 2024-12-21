@@ -84,18 +84,44 @@ set /p choice="Enter the number of the folder you want to use: "
 if !choice! leq 0 goto invalid_choice
 if !choice! gtr !index! goto invalid_choice
 
-:: Get selected folder name and store it in a temporary environment variable
+:: Get selected folder name
 set "selected_folder=!folder[%choice%]!"
 
 echo.
 echo ========================
-echo Starting app with !selected_folder!...
+echo Finding config file in !selected_folder!...
 echo ========================
 
-:: Store the selected folder in a global environment variable before endlocal
-endlocal & set "SELECTED_MODEL_FOLDER=%selected_folder%"
+:: Search for yml file in the selected folder
+set "config_file="
+for /f "delims=" %%F in ('dir /b ".\runs\!selected_folder!\*.yml" 2^>nul') do (
+    if not defined config_file (
+        set "config_file=%%F"
+        echo Found config file: %%F
+    )
+)
 
-python app_svc.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config ./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml --fp16 True
+:: If no yml file found in selected folder, use default config
+if not defined config_file (
+    echo No config file found in selected folder, using default config...
+    set "config_file=./configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"
+) else (
+    set "config_file=./runs/!selected_folder!/!config_file!"
+)
+
+echo.
+echo ========================
+echo Starting app with !selected_folder!...
+echo Using config: !config_file!
+echo ========================
+
+:: Store the selected folder and config file in global environment variables before endlocal
+endlocal & (
+    set "SELECTED_MODEL_FOLDER=%selected_folder%"
+    set "CONFIG_FILE=%config_file%"
+)
+
+python app_svc.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config %CONFIG_FILE% --fp16 True
 
 setlocal enabledelayedexpansion
 
