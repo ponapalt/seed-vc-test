@@ -12,7 +12,7 @@ pretrained_encoder: ""
 load_only_params: False # set to true if do not want to load epoch numbers and optimizer parameters
 
 preprocess_params:
-  sr: 48000
+  sr: 44100
   spect_params:
     n_fft: 2048
     win_length: 2048

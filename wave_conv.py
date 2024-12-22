@@ -89,7 +89,7 @@ def convert_wav(input_path, output_path, target_rate):
 def main():
     if len(sys.argv) != 2:
         print("使用方法: python script.py <モード番号>")
-        print("モード: 1 = 22050Hz, 2 = 44100Hz, 3 = 48000Hz")
+        print("モード: 1 = 22050Hz, 2 = 44100Hz, 3 = 44100Hz")
         sys.exit(1)
     
     # モード番号から目標サンプリングレートを決定
@@ -97,7 +97,7 @@ def main():
     target_rates = {
         1: 22050,
         2: 44100,
-        3: 48000
+        3: 44100
     }
     
     if mode not in target_rates:
