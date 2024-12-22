@@ -90,6 +90,7 @@ if "!model_type!"=="1" (
     set "config_path=./configs/presets/config_ultimate_quality.yml"
 ) else (
     echo Invalid selection. Using default Singing config.
+    set "model_type=2"
 )
 
 :: Ask for max epochs
@@ -115,12 +116,20 @@ echo ========================
 echo Starting training...
 echo ========================
 
-:: Store the variables in global environment variables before endlocal
-endlocal & set "TRAIN_MAX_EPOCHS=%max_epochs%" & set "TRAIN_RUN_NAME=%run_name%" & set "TRAIN_CONFIG_PATH=%config_path%"
+:: Store all variables in global environment variables including model_type
+endlocal & set "TRAIN_MAX_EPOCHS=%max_epochs%" & set "TRAIN_RUN_NAME=%run_name%" & set "TRAIN_CONFIG_PATH=%config_path%" & set "TRAIN_MODEL_TYPE=%model_type%"
 
-python train.py --config %TRAIN_CONFIG_PATH% --dataset-dir ./training_data --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
+echo.
+echo ========================
+echo Converting WAV files...
+echo ========================
+python wave_conv.py %TRAIN_MODEL_TYPE%
+if !ERRORLEVEL! neq 0 (
+    echo Failed to convert WAV files.
+    exit /b 1
+)
 
-setlocal enabledelayedexpansion
+python train.py --config %TRAIN_CONFIG_PATH% --dataset-dir ./training_data_conv --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
 
 if !ERRORLEVEL! neq 0 (
     echo Failed to start the application.
