@@ -141,6 +141,7 @@ def main():
             except Exception as e:
                 print(f"エラー ({file}): {str(e)}")
                 continue
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

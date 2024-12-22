@@ -126,7 +126,9 @@ echo ========================
 python wave_conv.py %TRAIN_MODEL_TYPE%
 if !ERRORLEVEL! neq 0 (
     echo Failed to convert WAV files.
-    exit /b 1
+    goto end
+) else (
+    echo WAV conversion completed successfully.
 )
 
 python train.py --config %TRAIN_CONFIG_PATH% --dataset-dir ./training_data_conv --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
