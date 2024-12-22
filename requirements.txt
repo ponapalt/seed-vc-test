@@ -22,5 +22,5 @@ python-dotenv
 onnx
 onnxruntime
 onnxconverter-common
-scipy
-numpy
+soundfile
+librosa

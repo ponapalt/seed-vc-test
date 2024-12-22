@@ -1,97 +1,64 @@
 import os
 import sys
-import wave
 import shutil
-from scipy import signal
-import numpy as np
+import soundfile as sf
+import librosa
 
-def get_wav_info(file_path):
-    """WAVファイルの情報を取得する"""
-    with wave.open(file_path, 'rb') as wav:
+def get_audio_info(file_path):
+    """音声ファイルの情報を取得する"""
+    try:
+        info = sf.info(file_path)
         return {
-            'channels': wav.getnchannels(),
-            'sampwidth': wav.getsampwidth(),
-            'framerate': wav.getframerate(),
-            'frames': wav.getnframes()
+            'samplerate': info.samplerate,
+            'channels': info.channels,
+            'subtype': info.subtype,  # フォーマット情報（例：'PCM_16'）
+            'frames': info.frames
         }
+    except Exception as e:
+        print(f"Error reading file info: {str(e)}")
+        return None
 
-def convert_wav(input_path, output_path, target_rate):
-    """WAVファイルを指定のサンプリングレートに変換する"""
-    # 入力WAVファイルを読み込む
-    with wave.open(input_path, 'rb') as wav_in:
-        # パラメータを取得
-        channels = wav_in.getnchannels()
-        sampwidth = wav_in.getsampwidth()
-        framerate = wav_in.getframerate()
+def convert_audio(input_path, output_path, target_rate):
+    """音声ファイルを指定のサンプリングレートに変換する"""
+    try:
+        # librosaで音声を読み込む（自動的にfloat32、モノラル化される）
+        audio, sr = librosa.load(input_path, sr=None, mono=False)
         
-        # 音声データを読み込む
-        frames = wav_in.readframes(wav_in.getnframes())
-        
-        # 24bitの場合は特別な処理が必要
-        if sampwidth == 3:  # 24bit
-            # 24bitデータを32bitとして読み込む
-            # 3バイトを4バイトに拡張して読み込む必要がある
-            num_samples = len(frames) // 3
-            audio_data = np.zeros(num_samples, dtype=np.int32)
-            
-            # 24bitデータを32bitに変換
-            for i in range(num_samples):
-                # リトルエンディアンで3バイトを読み込み、符号を保持して32bitに拡張
-                bytes_24 = frames[i*3:(i+1)*3] + (b'\x00' if frames[i*3+2] < 128 else b'\xff')
-                audio_data[i] = int.from_bytes(bytes_24, byteorder='little', signed=True)
-        else:
-            # その他のビット深度の処理
-            if sampwidth == 2:  # 16bit
-                dtype = np.int16
-            elif sampwidth == 1:  # 8bit
-                dtype = np.int8
-            elif sampwidth == 4:  # 32bit
-                dtype = np.int32
-            else:
-                raise ValueError(f"Unsupported sample width: {sampwidth}")
-            
-            # バイトデータをnumpy配列に変換
-            audio_data = np.frombuffer(frames, dtype=dtype)
-        
-        # ステレオの場合は適切に整形
-        if channels == 2:
-            audio_data = audio_data.reshape(-1, 2)
-        
-        # リサンプリング
-        if framerate != target_rate:
-            # 最大公約数を使用して適切な比率を計算
-            gcd = np.gcd(framerate, target_rate)
-            up = target_rate // gcd
-            down = framerate // gcd
-            
-            # signal.resample_polyを使用してより高品質なリサンプリングを実行
-            audio_data = signal.resample_poly(audio_data, up, down, axis=0)
-            
-            # float32からint16への変換時のスケーリングを調整
-            if audio_data.dtype == np.float32:
-                audio_data = np.int16(np.clip(audio_data * 32767, -32768, 32767))
-        
-        # 16bitに正規化
-        if audio_data.dtype != np.int16:
-            # データ型に応じてスケーリング
-            if audio_data.dtype == np.int8:
-                # 8bit (-128...127) から 16bit (-32768...32767) へ
-                audio_data = audio_data.astype(np.float32) * 256
-            elif audio_data.dtype == np.int32:
-                # 24/32bit から 16bit へ
-                # 24bitの場合は8ビット右シフト、32bitの場合は16ビット右シフト
-                shift = 8 if sampwidth == 3 else 16
-                audio_data = np.right_shift(audio_data, shift)
-            
-            # 範囲を16bitに制限
-            audio_data = np.clip(audio_data, -32768, 32767).astype(np.int16)
-        
-        # 出力WAVファイルを作成
-        with wave.open(output_path, 'wb') as wav_out:
-            wav_out.setnchannels(channels)
-            wav_out.setsampwidth(2)  # 16bit = 2bytes
-            wav_out.setframerate(target_rate)
-            wav_out.writeframes(audio_data.tobytes())
+        # ステレオの場合は転置して正しい形式にする
+        if len(audio.shape) == 2 and audio.shape[0] == 2:
+            audio = audio.T
+
+        # サンプリングレートの変換が必要な場合
+        if sr != target_rate:
+            # librosaのresampleを使用（高品質なリサンプリング）
+            audio = librosa.resample(
+                y=audio,
+                orig_sr=sr,
+                target_sr=target_rate,
+                res_type='kaiser_best'  # 最高品質の設定
+            )
+
+        # ステレオの場合は元の形式に戻す
+        if len(audio.shape) == 2 and audio.shape[1] == 2:
+            audio = audio.T
+
+        # 16bitの範囲にクリッピング
+        audio = audio * 32767
+        audio = audio.clip(-32768, 32767)
+
+        # 16bit PCMとして保存
+        sf.write(
+            output_path,
+            audio,
+            target_rate,
+            subtype='PCM_16',
+            format='WAV'
+        )
+        return True
+
+    except Exception as e:
+        print(f"Error during conversion: {str(e)}")
+        return False
 
 def main():
     if len(sys.argv) != 2:
@@ -126,28 +93,50 @@ def main():
         os.makedirs(output_dir)
     
     # training_data内のWAVファイルを処理
+    total_files = 0
+    converted_files = 0
+    copied_files = 0
+    error_files = 0
+    
     for file in os.listdir(input_dir):
         if file.lower().endswith('.wav'):
+            total_files += 1
             input_path = os.path.join(input_dir, file)
             output_path = os.path.join(output_dir, file)
             
+            # 音声ファイルの情報を取得
+            info = get_audio_info(input_path)
+            if info is None:
+                error_files += 1
+                continue
+            
             try:
-                # WAVファイルの情報を取得
-                wav_info = get_wav_info(input_path)
-                
-                # 仕様チェック
-                if (wav_info['framerate'] == target_rate and 
-                    wav_info['sampwidth'] == 2):  # 16bit = 2bytes
+                # サンプリングレートとビット深度をチェック
+                if info['samplerate'] == target_rate and info['subtype'] == 'PCM_16':
                     # 仕様が一致する場合はコピー
                     shutil.copy2(input_path, output_path)
-                    print(f"コピー: {file}")
+                    print(f"コピー完了: {file}")
+                    copied_files += 1
                 else:
                     # 仕様が一致しない場合は変換
-                    convert_wav(input_path, output_path, target_rate)
-                    print(f"変換: {file}")
+                    if convert_audio(input_path, output_path, target_rate):
+                        print(f"変換完了: {file}")
+                        converted_files += 1
+                    else:
+                        print(f"変換失敗: {file}")
+                        error_files += 1
+            
             except Exception as e:
                 print(f"エラー ({file}): {str(e)}")
+                error_files += 1
                 continue
+    
+    # 処理結果のサマリーを表示
+    print("\n処理完了サマリー:")
+    print(f"総ファイル数: {total_files}")
+    print(f"コピー完了: {copied_files}")
+    print(f"変換完了: {converted_files}")
+    print(f"エラー: {error_files}")
 
 if __name__ == "__main__":
     main()
