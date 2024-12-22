@@ -59,10 +59,17 @@ def convert_wav(input_path, output_path, target_rate):
         
         # リサンプリング
         if framerate != target_rate:
-            # リサンプリング処理
-            samples = len(audio_data)
-            new_samples = int(samples * target_rate / framerate)
-            audio_data = signal.resample(audio_data, new_samples)
+            # 最大公約数を使用して適切な比率を計算
+            gcd = np.gcd(framerate, target_rate)
+            up = target_rate // gcd
+            down = framerate // gcd
+            
+            # signal.resample_polyを使用してより高品質なリサンプリングを実行
+            audio_data = signal.resample_poly(audio_data, up, down, axis=0)
+            
+            # float32からint16への変換時のスケーリングを調整
+            if audio_data.dtype == np.float32:
+                audio_data = np.int16(np.clip(audio_data * 32767, -32768, 32767))
         
         # 16bitに正規化
         if audio_data.dtype != np.int16:
@@ -95,9 +102,9 @@ def main():
     # モード番号から目標サンプリングレートを決定
     mode = int(sys.argv[1])
     target_rates = {
-        1: 22050,
-        2: 44100,
-        3: 44100
+        1: 22050,  # Realtimeモード用
+        2: 44100,  # Singingモード用
+        3: 44100   # Testモード用
     }
     
     if mode not in target_rates:
@@ -141,7 +148,6 @@ def main():
             except Exception as e:
                 print(f"エラー ({file}): {str(e)}")
                 continue
-    sys.exit(0)
 
 if __name__ == "__main__":
     main()
