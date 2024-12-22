@@ -24,3 +24,4 @@ onnxruntime
 onnxconverter-common
 soundfile
 librosa
+resampy
