@@ -111,11 +111,6 @@ echo.
 set /p "confirm=Is this correct? (Y/N): "
 if /i not "!confirm!"=="Y" goto end
 
-echo.
-echo ========================
-echo Starting training...
-echo ========================
-
 :: Store all variables in global environment variables including model_type
 endlocal & set "TRAIN_MAX_EPOCHS=%max_epochs%" & set "TRAIN_RUN_NAME=%run_name%" & set "TRAIN_CONFIG_PATH=%config_path%" & set "TRAIN_MODEL_TYPE=%model_type%"
 
@@ -124,13 +119,11 @@ echo ========================
 echo Converting WAV files...
 echo ========================
 python wave_conv.py %TRAIN_MODEL_TYPE%
-if !ERRORLEVEL! neq 0 (
-    echo Failed to convert WAV files.
-    goto end
-) else (
-    echo WAV conversion completed successfully.
-)
 
+echo.
+echo ========================
+echo Starting training...
+echo ========================
 python train.py --config %TRAIN_CONFIG_PATH% --dataset-dir ./training_data_conv --run-name %TRAIN_RUN_NAME% --batch-size 2 --max-steps 1000 --max-epochs %TRAIN_MAX_EPOCHS% --save-every 500 --num-workers 0
 
 if !ERRORLEVEL! neq 0 (
