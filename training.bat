@@ -85,6 +85,7 @@ set /p "batch_input=Enter batch size (press Enter to use default): "
 if not "!batch_input!"=="" set "batch_size=!batch_input!"
 
 :: Select model type
+echo ------------------------
 echo Select model type:
 echo 1) Realtime Fine Tune
 echo 2) Singing Fine Tune
@@ -104,14 +105,16 @@ if "!model_type!"=="1" (
 )
 
 :: Ask for max epochs
+echo ------------------------
 set /p "epochs_input=Enter maximum epochs (default: !max_epochs!, press Enter to use default): "
 if not "!epochs_input!"=="" set "max_epochs=!epochs_input!"
 
 :: Ask for run name
+echo ------------------------
 set /p "name_input=Enter run name (default: model, press Enter to use default): "
 if not "!name_input!"=="" set "run_name=!name_input!"
 
-echo.
+echo ------------------------
 echo Configuration Summary:
 echo - Training Type: !model_type! (1=Realtime, 2=Singing, 3=Full)
 echo - Config File: !config_path!
