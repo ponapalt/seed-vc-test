@@ -77,7 +77,7 @@ set /p conversion_type="Enter the number of the conversion type you want to use 
 
 :: Validate conversion type input
 set /a test_type=conversion_type
-if %test_type% LSS 1 goto invalid_choice
+if %test_type% LEQ 0 goto invalid_choice
 if %test_type% GTR 3 goto invalid_choice
 
 echo.
