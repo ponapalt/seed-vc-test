@@ -76,8 +76,9 @@ echo 3) Singing
 set /p conversion_type="Enter the number of the conversion type you want to use (1-3): "
 
 :: Validate conversion type input
-if !conversion_type! lss 1 goto invalid_choice
-if !conversion_type! gtr 3 goto invalid_choice
+set /a test_type=conversion_type
+if %test_type% LSS 1 goto invalid_choice
+if %test_type% GTR 3 goto invalid_choice
 
 echo.
 echo ========================
