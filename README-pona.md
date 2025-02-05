@@ -1,10 +1,16 @@
-## realtime_convesion.bat
+## run.bat
 
-リアルタイムボイチェン
+ボイスチェンジャー本体を実行します。
 
-## singing_voice_conversion.bat
+最初に以下の選択肢が出るので、適切なものを選んでください。
 
-歌声変換
+- Realtime Voice : リアルタイム音声変換
+- Voice : オフライン音声変換
+- Singing : 歌声変換
+
+**Source Audio**に変換元の音声ファイルをドロップしてください。
+
+また、必ず**Reference Audio**に学習に使った音声ファイルのうちどれか1つ（どれでもよい）をドロップしてください。
 
 ## training.bat
 

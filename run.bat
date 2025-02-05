@@ -67,6 +67,20 @@ if !ERRORLEVEL! neq 0 (
 
 echo.
 echo ========================
+echo Select conversion type...
+echo ========================
+echo 1) Realtime Voice
+echo 2) Voice
+echo 3) Singing
+
+set /p conversion_type="Enter the number of the conversion type you want to use (1-3): "
+
+:: Validate conversion type input
+if !conversion_type! leq 0 goto invalid_choice
+if !conversion_type! gtr 3 goto invalid_choice
+
+echo.
+echo ========================
 echo Select model folder...
 echo ========================
 
@@ -119,9 +133,17 @@ echo ========================
 endlocal & (
     set "SELECTED_MODEL_FOLDER=%selected_folder%"
     set "CONFIG_FILE=%config_file%"
+    set "CONVERSION_TYPE=%conversion_type%"
 )
 
-python real-time-gui.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config %CONFIG_FILE%
+:: Execute different commands based on conversion type
+if "%CONVERSION_TYPE%"=="1" (
+    python real-time-gui.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config %CONFIG_FILE%
+) else if "%CONVERSION_TYPE%"=="2" (
+    python app_vc.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config %CONFIG_FILE% --fp16 True
+) else (
+    python app_svc.py --checkpoint ./runs/%SELECTED_MODEL_FOLDER%/ft_model.pth --config %CONFIG_FILE% --fp16 True
+)
 
 setlocal enabledelayedexpansion
 
