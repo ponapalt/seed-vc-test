@@ -20,9 +20,10 @@
 
 以下の選択肢が出るので、適切なものを選んでください。
 
-- Realtime Voice : リアルタイム音声変換 (seed-uvit-tat-xlsr-tiny)
-- Voice : オフライン音声変換 (seed-uvit-whisper-small-wavenet)
-- Singing : 歌声変換 (seed-uvit-whisper-base)
+- Realtime Fine Tune : リアルタイム音声変換 (seed-uvit-tat-xlsr-tiny) + seed-vc標準モデルのファインチューニング
+- Voice Fine Tune : オフライン音声変換 (seed-uvit-whisper-small-wavenet) + seed-vc標準モデルのファインチューニング
+- Singing Fine Tune : 歌声変換 (seed-uvit-whisper-base) + seed-vc標準モデルのファインチューニング
+- Full Scratch : 歌声変換 (seed-uvit-whisper-base) 向けにゼロからモデルをトレーニングする
 
 その他注意点は以下の通りです。
 
