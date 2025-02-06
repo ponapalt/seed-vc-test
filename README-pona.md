@@ -4,9 +4,9 @@
 
 最初に以下の選択肢が出るので、適切なものを選んでください。
 
-- Realtime Voice : リアルタイム音声変換
-- Voice : オフライン音声変換
-- Singing : 歌声変換
+- Realtime Voice : リアルタイム音声変換 (seed-uvit-tat-xlsr-tiny)
+- Voice : オフライン音声変換 (seed-uvit-whisper-small-wavenet)
+- Singing : 歌声変換 (seed-uvit-whisper-base)
 
 **Source Audio**に変換元の音声ファイルをドロップしてください。
 
@@ -14,7 +14,15 @@
 
 ## training.bat
 
-トレーニング
+トレーニングを実行します。
+
+以下の選択肢が出るので、適切なものを選んでください。
+
+- Realtime Voice : リアルタイム音声変換 (seed-uvit-tat-xlsr-tiny)
+- Voice : オフライン音声変換 (seed-uvit-whisper-small-wavenet)
+- Singing : 歌声変換 (seed-uvit-whisper-base)
+
+その他注意点は以下の通りです。
 
 - training_dataにwavファイルを入れてください
 - training_data_convには、所定形式に変換済みの音声ファイルが入ります。
