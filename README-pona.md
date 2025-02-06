@@ -29,7 +29,7 @@
 
 - training_dataにwavファイルを入れてください
 - training_data_convには、所定形式に変換済みの音声ファイルが入ります。
-  realtime_conversionやsinging_voice_conversionを使うときには、このディレクトリに入った音声ファイルを使ってください
+  realtime_conversionやsinging_voice_conversionを使うときには、このディレクトリに入った音声ファイルのうちどれか1つを、Reference Audioとして使ってください
 - 学習のepoch数が不足していると感じた場合には、同じモデル名で再度学習を実行すると、前回の学習結果の続きから再スタートできます。
   たとえば、1000epochで足りない場合に、もう1000epoch追加したいと考えた時に利用できます。
 - その他バッチファイル内で表示されるメッセージに従って、設定を入力してください。
